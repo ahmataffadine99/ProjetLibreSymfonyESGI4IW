@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace Administration{% endblock %}
+
+{% block body %}
+    <h1>Bienvenue dans l'espace administration !</h1>
+
+    <p>Vous avez tous les pouvoirs !</p>
+
+    <p><a href="{{ path('logout') }}">Se déconnecter</a></p>
+    <p><a href="{{ path('homepage') }}">Retour à l'accueil</a></p>
+{% endblock %}

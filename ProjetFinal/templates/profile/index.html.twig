@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Votre Profil{% endblock %}
+
+{% block body %}
+    <h1>Votre Profil</h1>
+
+    {% if user %}
+        <p>Email : {{ user.email }}</p>
+        <p>Rôles : {{ user.roles|join(', ') }}</p>
+    {% else %}
+        <p>Vous n'êtes pas connecté.</p>
+    {% endif %}
+
+    <p><a href="{{ path('logout') }}">Se déconnecter</a></p>
+    <p><a href="{{ path('homepage') }}">Retour à l'accueil</a></p>
+{% endblock %}

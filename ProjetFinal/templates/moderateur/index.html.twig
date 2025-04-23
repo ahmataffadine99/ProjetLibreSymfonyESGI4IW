@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace Modérateur{% endblock %}
+
+{% block body %}
+    <h1>Bienvenue dans l'espace modérateur !</h1>
+
+    <p>Vous avez les permissions de modérateur.</p>
+
+    <p><a href="{{ path('logout') }}">Se déconnecter</a></p>
+{% endblock %}

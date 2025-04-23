@@ -1,0 +1,6 @@
+ObjetCollection <-> Categorie (ManyToMany)
+ObjetCollection <-> Tag (ManyToMany)
+Proprietaire -> ObjetCollection (OneToMany)
+Emplacement -> ObjetCollection (OneToMany)
+Utilisateur -> ObjetCollection (OneToMany)
+StatutObjet -> ObjetCollection (OneToMany)

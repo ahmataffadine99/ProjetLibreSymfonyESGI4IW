@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma Collection{% endblock %}
+
+{% block body %}
+    <h1>Ma Collection</h1>
+
+    <form method="get" class="mb-3">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="type" class="form-label">Filtrer par type :</label>
+            </div>
+            <div class="col-auto">
+                <select name="type" id="type" class="form-select">
+                    <option value="">Tous les types</option>
+                    <option value="livre" {% if app.request.get('type') == 'livre' %}selected{% endif %}>Livres</option>
+                    <option value="vinyle" {% if app.request.get('type') == 'vinyle' %}selected{% endif %}>Vinyles</option>
+                    <option value="jeu-video" {% if app.request.get('type') == 'jeu-video' %}selected{% endif %}>Jeux Vidéo</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Filtrer</button>
+            </div>
+        </div>
+    </form>
+
+    {% if objetsWithType is empty %}
+        <p>Votre collection est vide pour le moment.</p>
+    {% else %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Date d'ajout</th>
+                    <th>Statut</th>
+                    <th>Catégorie</th>
+                    <th>Tags</th>
+                    <th>Emplacement</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in objetsWithType %}
+                    <tr>
+                        <td>{{ item.nom }}</td>
+                        <td>
+                            <?php
+                            if ($item instanceof \App\Entity\Livre) {
+                                echo 'Livre';
+                            } elseif ($item instanceof \App\Entity\Vinyle) {
+                                echo 'Vinyle';
+                            } elseif ($item instanceof \App\Entity\JeuVideo) {
+                                echo 'Jeu Vidéo';
+                            } else {
+                                echo 'Type inconnu';
+                            }
+                            ?>
+                        </td>
+                        <td>{{ item.dateAjout|date('Y-m-d H:i:s') }}</td>
+                        <td>{{ item.statut ? item.statut.nom : '' }}</td>
+                        <td>{{ item.categorie ? item.categorie.nom : '' }}</td>
+                        <td>
+                            {% for tag in item.tags %}
+                                <span class="badge bg-secondary">{{ tag.nom }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ item.emplacement ? item.emplacement.nom : '' }}</td>
+                        <td>
+                            <a href="{{ path('objet_collection_details', {'id': item.id}) }}" class="btn btn-sm btn-info">Détails</a>
+                            <a href="{{ path('objet_modifier', {'id': item.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                            <a href="{{ path('objet_supprimer', {'id': item.id}) }}" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');">Supprimer</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{{ path('objet_ajouter', {'type': 'livre'}) }}" class="btn btn-primary">Ajouter un Livre</a>
+        <a href="{{ path('objet_ajouter', {'type': 'vinyle'}) }}" class="btn btn-primary">Ajouter un Vinyle</a>
+        <a href="{{ path('objet_ajouter', {'type': 'jeu-video'}) }}" class="btn btn-primary">Ajouter un Jeu Vidéo</a>
+    </div>
+{% endblock %}

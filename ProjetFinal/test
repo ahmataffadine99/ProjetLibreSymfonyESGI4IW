@@ -4,3 +4,37 @@ Proprietaire -> ObjetCollection (OneToMany)
 Emplacement -> ObjetCollection (OneToMany)
 Utilisateur -> ObjetCollection (OneToMany)
 StatutObjet -> ObjetCollection (OneToMany)
+
+
+
+
+/*----
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+    <h1>Bienvenue sur votre gestionnaire de collection !</h1>
+
+    {% if app.user %}
+        <p>Bonjour, {{ app.user.email }} !</p>
+        <ul>
+            <li><a href="{{ path('profile_index') }}">Votre Profil</a></li>
+            {% if is_granted('ROLE_MODERATEUR') %}
+                <li><a href="{{ path('moderateur_index') }}">Espace Modérateur</a></li>
+            {% endif %}
+            {% if is_granted('ROLE_ADMIN') %}
+                <li><a href="{{ path('admin_index') }}">Espace Admin</a></li>
+            {% endif %}
+            <li><a href="{{ path('logout') }}">Se déconnecter</a></li>
+        </ul>
+    {% else %}
+        <p>Veuillez vous connecter.</p>
+        <p><a href="{{ path('login') }}">Se connecter</a></p>
+    {% endif %}
+{% endblock %}
+----*/
+
+
+
+

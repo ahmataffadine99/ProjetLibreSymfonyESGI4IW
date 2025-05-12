@@ -1,0 +1,88 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Espace Administration{% endblock %}
+
+{% block content %}
+    <h1>Bienvenue dans votre administration! {{ app.user.email }} !</h1>
+
+    {% if app.user.nom is  defined %}
+        <p>Bonjour, {{ app.user.nom }}</p>
+    {% endif %}
+
+    <p>Vous avez tous les pouvoirs !</p>
+
+  <!----  <ul class="list-unstyled">
+        <li><a href="{{ path('admin_users_index') }}" class="btn btn-primary">Gestion des Utilisateurs</a></li>
+        <li><a href="{{ path('admin_objets_list') }}" class="btn btn-primary mt-2">Gestion des Objets</a></li>
+        {# Ajoutez ici d'autres liens vers les sections d'administration #}
+    </ul>
+    -->
+
+
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Utilisateurs</h5>
+                    <p class="card-text">{{ totalUsersCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Objets Ajoutés (mois)</h5>
+                    <p class="card-text">{{ recentObjectsCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Objets</h5>
+                    <p class="card-text">{{ livresCount + vinylesCount + jeuxVideoCount }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="chart_div" style="width: 80%; height: 300px; margin: 20px auto;"></div>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Type', 'Nombre'],
+                ['Livres', {{ livresCount }}],
+                ['Vinyles', {{ vinylesCount }}],
+                ['Jeux Vidéo', {{ jeuxVideoCount }}]
+            ]);
+        var options = {
+                title: 'Répartition des objets par type',
+                titleTextStyle: {
+                    color: 'blue', // Couleur par défaut, mais pour s'assurer que c'est là
+                    fontSize: 16,
+                    bold: true,
+                    italic: false,
+                    textAlign: 'center' // Encore une tentative avec textAlign
+                },
+                is3D: true
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+    </script>
+
+
+    <hr class="my-4">
+
+    <p><a href="{{ path('logout') }}">Se déconnecter</a></p>
+    <p><a href="{{ path('homepage') }}">Retour à l'accueil</a></p>
+
+{% endblock %}

@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Entity;
-
+use App\Entity\Tag;
+use App\Entity\Emplacement;
 use App\Repository\ObjetCollectionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use App\Entity\Categorie;
 
 #[ORM\Entity(repositoryClass: ObjetCollectionRepository::class)]
 #[ORM\InheritanceType('JOINED')]
@@ -29,6 +30,8 @@ abstract class ObjetCollection
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
+    
+
     /**
      * @var Collection<int, Categorie>
      */
@@ -41,23 +44,67 @@ abstract class ObjetCollection
     #[ORM\ManyToOne(inversedBy: 'objetsCollection')]
     private ?Emplacement $emplacement = null;
 
-    /**
-     * @var Collection<int, Tag>
-     */
-    #[ORM\ManyToMany(targetEntity: Tag::class, mappedBy: 'objetsCollection')]
-    private Collection $tags;
-
-    #[ORM\ManyToOne(inversedBy: 'objetsAjoutes')]
-    private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'objetsCollection')]
     #[ORM\JoinColumn(nullable: false)]
     private ?StatutObjet $statut = null;
 
+    #[ORM\ManyToOne(inversedBy: 'objetsCollection')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Categorie $categorie = null;
+
+
+
+/**
+ * @var Collection<int, Tag>
+ */
+#[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'objetsCollection')]
+#[ORM\JoinTable(name: 'objet_collection_tag')]
+#[ORM\JoinColumn(name: 'objet_collection_id', referencedColumnName: 'id')]
+#[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id')]
+private Collection $tags;
+
+
+    
+    #[ORM\ManyToOne(inversedBy: 'objetsAjoutes')]
+    private ?Utilisateur $utilisateur = null;
+
     public function __construct()
     {
-        $this->categories = new ArrayCollection();
         $this->tags = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): static
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+            $tag->addObjetsCollection($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): static
+    {
+        if ($this->tags->removeElement($tag)) {
+            $tag->removeObjetsCollection($this);
+        }
+
+        return $this;
+    }
+
+   
+    public function getCategories(): Collection
+    {
+        return $this->categories;
     }
 
     public function getId(): ?int
@@ -104,10 +151,21 @@ abstract class ObjetCollection
     /**
      * @return Collection<int, Categorie>
      */
-    public function getCategories(): Collection
+
+
+    public function getCategorie(): ?Categorie
     {
-        return $this->categories;
+        return $this->categorie;
     }
+
+    public function setCategorie(?Categorie $categorie): static
+    {
+        $this->categorie = $categorie;
+
+        return $this;
+    }
+
+
 
     public function getStatut(): ?StatutObjet
     {
@@ -164,33 +222,9 @@ abstract class ObjetCollection
         return $this;
     }
 
-    /**
-     * @return Collection<int, Tag>
-     */
-    public function getTags(): Collection
-    {
-        return $this->tags;
-    }
+  
 
-    public function addTag(Tag $tag): static
-    {
-        if (!$this->tags->contains($tag)) {
-            $this->tags->add($tag);
-            $tag->addObjetsCollection($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTag(Tag $tag): static
-    {
-        if ($this->tags->removeElement($tag)) {
-            $tag->removeObjetsCollection($this);
-        }
-
-        return $this;
-    }
-
+   
     public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
@@ -202,4 +236,5 @@ abstract class ObjetCollection
 
         return $this;
     }
+    
 }

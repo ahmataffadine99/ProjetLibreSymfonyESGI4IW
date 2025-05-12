@@ -21,9 +21,10 @@ class Tag
     /**
      * @var Collection<int, ObjetCollection>
      */
-    #[ORM\ManyToMany(targetEntity: ObjetCollection::class, inversedBy: 'tags')]
-    private Collection $objetsCollection;
 
+   
+    #[ORM\ManyToMany(mappedBy: 'tags', targetEntity: ObjetCollection::class)]
+    private Collection $objetsCollection;
     public function __construct()
     {
         $this->objetsCollection = new ArrayCollection();

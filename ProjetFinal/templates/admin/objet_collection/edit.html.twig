@@ -1,0 +1,14 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Modifier l'Objet{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'Objet</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('admin_objets_list') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %}

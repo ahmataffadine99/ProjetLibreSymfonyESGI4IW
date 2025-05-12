@@ -17,7 +17,7 @@ security:
             provider: app_user_provider
             form_login:
                 login_path: login
-                default_target_path: / # Rediriger après la connexion
+                default_target_path: / # COMMENTEZ OU SUPPRIMEZ CETTE LIGNE
                 check_path: login # La route pour soumettre le formulaire de connexion
             logout:
                 path: logout

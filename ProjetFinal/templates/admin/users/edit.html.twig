@@ -1,0 +1,15 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Modifier l'Utilisateur {{ utilisateur.email }}{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'Utilisateur {{ utilisateur.email }}</h1>
+
+    {{ form_start(form, {'action': path('admin_users_update_roles', {'id': utilisateur.id})}) }}
+        {{ form_row(form.roles) }}
+
+        <button type="submit" class="btn btn-primary">Enregistrer les rôles</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('admin_users_index') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %}

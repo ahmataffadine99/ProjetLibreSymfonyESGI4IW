@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'Objet{% endblock %}
+
+{% block body %}
+    <h1>Modifier l'Objet #{{ objet.id }} - {{ objet.nom }}</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+
+        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('objet_collection_details', {'id': objet.id}) }}" class="btn btn-secondary mt-3">Annuler</a>
+{% endblock %}

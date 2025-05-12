@@ -1,0 +1,76 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestion des Objets{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestion des Objets</h1>
+        <a href="{{ path('admin_index') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i> Retour au Dashboard
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Date d'ajout</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for objet in objets %}
+                    <tr>
+                        <td>{{ objet.id }}</td>
+                        <td>{{ objet.nom }}</td>
+                        <td>
+                            <?php
+                                if ($objet instanceof \App\Entity\Livre) {
+                                    echo 'Livre';
+                                } elseif ($objet instanceof \App\Entity\Vinyle) {
+                                    echo 'Vinyle';
+                                } elseif ($objet instanceof \App\Entity\JeuVideo) {
+                                    echo 'Jeu Vidéo';
+                                } else {
+                                    echo 'Autre';
+                                }
+                            ?>
+                        </td>
+                        <td>{{ objet.dateAjout|date('d/m/Y') }}</td>
+                        <td class="text-center">
+                            <a href="{{ path('admin_objets_edit', {'id': objet.id}) }}" class="btn btn-sm btn-primary me-2">
+                                <i class="bi bi-pencil me-1"></i> Modifier
+                            </a>
+                            <form method="post" action="{{ path('admin_objets_delete', {'id': objet.id}) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ objet.id) }}">
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash me-1"></i> Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Aucun objet trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">
+        <h5>Ajouter un nouvel objet</h5>
+        <a href="{{ path('admin_objets_add', {'type': 'livre'}) }}" class="btn btn-success me-2">
+            <i class="bi bi-book-half me-1"></i> Ajouter un Livre
+        </a>
+        <a href="{{ path('admin_objets_add', {'type': 'vinyle'}) }}" class="btn btn-success me-2">
+            <i class="bi bi-vinyl me-1"></i> Ajouter un Vinyle
+        </a>
+        <a href="{{ path('admin_objets_add', {'type': 'jeu-video'}) }}" class="btn btn-success">
+            <i class="bi bi-playstation me-1"></i> Ajouter un Jeu Vidéo
+        </a>
+    </div>
+{% endblock %}

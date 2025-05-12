@@ -19,11 +19,7 @@ class JeuVideo extends ObjetCollection
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $classification = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
+  
     public function getStudio(): ?string
     {
         return $this->studio;

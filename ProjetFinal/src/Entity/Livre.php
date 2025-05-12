@@ -19,10 +19,7 @@ class Livre extends ObjetCollection
     #[ORM\Column(nullable: true)]
     private ?int $nombrePages = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    
 
     public function getAuteur(): ?string
     {

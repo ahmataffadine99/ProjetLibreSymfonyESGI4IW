@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250423112929 extends AbstractMigration
+final class Version20250423151653 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -36,7 +36,10 @@ final class Version20250423112929 extends AbstractMigration
             CREATE TABLE livre (id INT NOT NULL, auteur VARCHAR(255) NOT NULL, isbn VARCHAR(20) DEFAULT NULL, nombre_pages INT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE objet_collection (id INT AUTO_INCREMENT NOT NULL, proprietaire_id INT DEFAULT NULL, emplacement_id INT DEFAULT NULL, utilisateur_id INT DEFAULT NULL, statut_id INT NOT NULL, nom VARCHAR(255) NOT NULL, date_ajout DATETIME NOT NULL, description LONGTEXT DEFAULT NULL, discr VARCHAR(255) NOT NULL, INDEX IDX_2F53F74876C50E4A (proprietaire_id), INDEX IDX_2F53F748C4598A51 (emplacement_id), INDEX IDX_2F53F748FB88E14F (utilisateur_id), INDEX IDX_2F53F748F6203804 (statut_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+            CREATE TABLE objet_collection (id INT AUTO_INCREMENT NOT NULL, proprietaire_id INT DEFAULT NULL, emplacement_id INT DEFAULT NULL, statut_id INT NOT NULL, categorie_id INT NOT NULL, utilisateur_id INT DEFAULT NULL, nom VARCHAR(255) NOT NULL, date_ajout DATETIME NOT NULL, description LONGTEXT DEFAULT NULL, discr VARCHAR(255) NOT NULL, INDEX IDX_2F53F74876C50E4A (proprietaire_id), INDEX IDX_2F53F748C4598A51 (emplacement_id), INDEX IDX_2F53F748F6203804 (statut_id), INDEX IDX_2F53F748BCF5E72D (categorie_id), INDEX IDX_2F53F748FB88E14F (utilisateur_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE objet_collection_tag (objet_collection_id INT NOT NULL, tag_id INT NOT NULL, INDEX IDX_9A8E8830B1576E53 (objet_collection_id), INDEX IDX_9A8E8830BAD26311 (tag_id), PRIMARY KEY(objet_collection_id, tag_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE proprietaire (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
@@ -46,9 +49,6 @@ final class Version20250423112929 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE tag (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE TABLE tag_objet_collection (tag_id INT NOT NULL, objet_collection_id INT NOT NULL, INDEX IDX_7B0C80FDBAD26311 (tag_id), INDEX IDX_7B0C80FDB1576E53 (objet_collection_id), PRIMARY KEY(tag_id, objet_collection_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE utilisateur (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, UNIQUE INDEX UNIQ_1D1C63B3E7927C74 (email), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
@@ -75,16 +75,19 @@ final class Version20250423112929 extends AbstractMigration
             ALTER TABLE objet_collection ADD CONSTRAINT FK_2F53F748C4598A51 FOREIGN KEY (emplacement_id) REFERENCES emplacement (id)
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE objet_collection ADD CONSTRAINT FK_2F53F748FB88E14F FOREIGN KEY (utilisateur_id) REFERENCES utilisateur (id)
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE objet_collection ADD CONSTRAINT FK_2F53F748F6203804 FOREIGN KEY (statut_id) REFERENCES statut_objet (id)
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE tag_objet_collection ADD CONSTRAINT FK_7B0C80FDBAD26311 FOREIGN KEY (tag_id) REFERENCES tag (id) ON DELETE CASCADE
+            ALTER TABLE objet_collection ADD CONSTRAINT FK_2F53F748BCF5E72D FOREIGN KEY (categorie_id) REFERENCES categorie (id)
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE tag_objet_collection ADD CONSTRAINT FK_7B0C80FDB1576E53 FOREIGN KEY (objet_collection_id) REFERENCES objet_collection (id) ON DELETE CASCADE
+            ALTER TABLE objet_collection ADD CONSTRAINT FK_2F53F748FB88E14F FOREIGN KEY (utilisateur_id) REFERENCES utilisateur (id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE objet_collection_tag ADD CONSTRAINT FK_9A8E8830B1576E53 FOREIGN KEY (objet_collection_id) REFERENCES objet_collection (id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE objet_collection_tag ADD CONSTRAINT FK_9A8E8830BAD26311 FOREIGN KEY (tag_id) REFERENCES tag (id)
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE vinyle ADD CONSTRAINT FK_8CD238D0BF396750 FOREIGN KEY (id) REFERENCES objet_collection (id) ON DELETE CASCADE
@@ -113,16 +116,19 @@ final class Version20250423112929 extends AbstractMigration
             ALTER TABLE objet_collection DROP FOREIGN KEY FK_2F53F748C4598A51
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE objet_collection DROP FOREIGN KEY FK_2F53F748FB88E14F
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE objet_collection DROP FOREIGN KEY FK_2F53F748F6203804
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE tag_objet_collection DROP FOREIGN KEY FK_7B0C80FDBAD26311
+            ALTER TABLE objet_collection DROP FOREIGN KEY FK_2F53F748BCF5E72D
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE tag_objet_collection DROP FOREIGN KEY FK_7B0C80FDB1576E53
+            ALTER TABLE objet_collection DROP FOREIGN KEY FK_2F53F748FB88E14F
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE objet_collection_tag DROP FOREIGN KEY FK_9A8E8830B1576E53
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE objet_collection_tag DROP FOREIGN KEY FK_9A8E8830BAD26311
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE vinyle DROP FOREIGN KEY FK_8CD238D0BF396750
@@ -146,6 +152,9 @@ final class Version20250423112929 extends AbstractMigration
             DROP TABLE objet_collection
         SQL);
         $this->addSql(<<<'SQL'
+            DROP TABLE objet_collection_tag
+        SQL);
+        $this->addSql(<<<'SQL'
             DROP TABLE proprietaire
         SQL);
         $this->addSql(<<<'SQL'
@@ -153,9 +162,6 @@ final class Version20250423112929 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE tag
-        SQL);
-        $this->addSql(<<<'SQL'
-            DROP TABLE tag_objet_collection
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE utilisateur

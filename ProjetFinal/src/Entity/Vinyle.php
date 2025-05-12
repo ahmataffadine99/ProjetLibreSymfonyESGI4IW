@@ -20,10 +20,7 @@ class Vinyle extends ObjetCollection
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $genre = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+   
 
     public function getArtiste(): ?string
     {

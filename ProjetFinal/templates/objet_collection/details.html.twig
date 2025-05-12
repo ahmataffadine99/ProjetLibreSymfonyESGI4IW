@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'Objet{% endblock %}
+
+{% block body %}
+    <h1>Détails de l'Objet</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ objet.nom }}</h5>
+
+            <h6 class="card-subtitle mb-2 text-muted">
+                Type:
+                {% if type == 'livre' %}Livre{% elseif type == 'vinyle' %}Vinyle{% elseif type == 'jeu_video' %}Jeu Vidéo{% else %}Autre{% endif %}
+            </h6>
+
+            <p class="card-text">
+                <strong>Date d'ajout:</strong> {{ objet.dateAjout|date('Y-m-d H:i:s') }}<br>
+                <strong>Statut:</strong> {{ objet.statut ? objet.statut.nom : 'Non défini' }}<br>
+                <strong>Catégorie:</strong> {{ objet.categorie ? objet.categorie.nom : 'Non définie' }}<br>
+                <strong>Emplacement:</strong> {{ objet.emplacement ? objet.emplacement.nom : 'Non défini' }}<br>
+                <strong>Description:</strong> {{ objet.description|default('Aucune description disponible.') }}
+            </p>
+
+            <div>
+                <strong>Tags:</strong>
+                {% if objet.tags is not empty %}
+                    {% for tag in objet.tags %}
+                        <span class="badge bg-secondary">{{ tag.nom }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted">Aucun tag.</span>
+                {% endif %}
+            </div>
+
+            <hr>
+
+            {% if type == 'livre' %}
+                <h5>Détails du Livre</h5>
+                <p>
+                    <strong>Auteur:</strong> {{ objet.auteur|default('Non renseigné') }}<br>
+                    <strong>ISBN:</strong> {{ objet.isbn|default('Non renseigné') }}<br>
+                    <strong>Nombre de pages:</strong> {{ objet.nombrePages|default('Non renseigné') }}
+                </p>
+            {% elseif type == 'vinyle' %}
+                <h5>Détails du Vinyle</h5>
+                <p>
+                    <strong>Artiste:</strong> {{ objet.artiste|default('Non renseigné') }}<br>
+                    <strong>Titre de l'album:</strong> {{ objet.titreAlbum|default('Non renseigné') }}<br>
+                    <strong>Genre:</strong> {{ objet.genre|default('Non renseigné') }}
+                </p>
+            {% elseif type == 'jeu_video' %}
+                <h5>Détails du Jeu Vidéo</h5>
+                <p>
+                    <strong>Studio:</strong> {{ objet.studio|default('Non renseigné') }}<br>
+                    <strong>Plateforme:</strong> {{ objet.plateforme|default('Non renseigné') }}<br>
+                    <strong>Classification:</strong> {{ objet.classification|default('Non renseigné') }}
+                </p>
+            {% endif %}
+
+            <hr>
+
+            <a href="{{ path('ma_collection') }}" class="btn btn-secondary">Retour à la collection</a>
+              <a href="{{ path('objet_modifier', {'id': objet.id}) }}" class="btn btn-warning">Modifier</a>
+              <a href="{{ path('objet_supprimer', {'id': objet.id}) }}" class="btn btn-danger"
+               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');">Supprimer</a>
+            {# Ajouter ici les liens pour modifier et supprimer l'objet #}
+        </div>
+    </div>
+{% endblock %}

@@ -1,9 +1,13 @@
+{# templates/objet_collection/ma_collection.html.twig #}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Ma Collection{% endblock %}
 
 {% block body %}
     <h1>Ma Collection</h1>
+
+    <p><a href="{{ path('toutes_les_collections') }}" class="btn btn-info mb-3 mt-3">Voir toutes les collections du site</a></p>
 
     {# Votre filtre de recherche existant - NE PAS TOUCHER #}
     <form method="get" class="mb-3">
@@ -43,19 +47,19 @@
             </thead>
             <tbody>
                 {# item est maintenant un tableau associatif avec une clé 'type' #}
-                {% for item in objetsWithType %} 
+                {% for item in objetsWithType %}
                     <tr>
                         <td>{{ item.nom }}</td>
                         <td>
                             {# AFFICHAGE DIRECT DU TYPE QUI EST DÉSORMAIS UNE CHAÎNE #}
-                            {{ item.type }} 
+                            {{ item.type }}
                         </td>
                         <td>{{ item.dateAjout|date('Y-m-d H:i:s') }}</td>
                         <td>{{ item.statut ? item.statut.nom : '' }}</td>
                         <td>{{ item.categorie ? item.categorie.nom : '' }}</td>
                         <td>
                             {% for tag in item.tags %}
-                                <span class="badge bg-secondary">{{ tag.nom }}</span>
+                                <span class="badge bg-secondary">{{ tag.nom }}</span>{% if not loop.last %}, {% endif %}
                             {% endfor %}
                         </td>
                         <td>{{ item.emplacement ? item.emplacement.nom : '' }}</td>
@@ -71,12 +75,14 @@
                             {% endif %}
 
                             {% if item.originalObject is defined and is_granted('DELETE', item.originalObject) %}
-                                <a href="{{ path('objet_supprimer', {'id': item.id}) }}" class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');">Supprimer</a>
+                                <form method="post" action="{{ path('objet_supprimer', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');" style="display:inline-block;">
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
                             {% else %}
                                 {# Optionnel: si le Voter n'est pas utilisé ou si item.originalObject n'est pas passé #}
-                                <a href="{{ path('objet_supprimer', {'id': item.id}) }}" class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');">Supprimer</a>
+                                <form method="post" action="{{ path('objet_supprimer', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');" style="display:inline-block;">
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
                             {% endif %}
                         </td>
                     </tr>
@@ -90,8 +96,8 @@
         <a href="{{ path('objet_ajouter', {'type': 'vinyle'}) }}" class="btn btn-primary">Ajouter un Vinyle</a>
         <a href="{{ path('objet_ajouter', {'type': 'jeu-video'}) }}" class="btn btn-primary">Ajouter un Jeu Vidéo</a>
     </div>
-    
-    <div class="mt-4">    
-        <a href="{{ path('homepage') }}" class="btn btn-secondary">Retour à l'accueil</a>    
+
+    <div class="mt-4">
+        <a href="{{ path('homepage') }}" class="btn btn-secondary">Retour à l'accueil</a>
     </div>
 {% endblock %}

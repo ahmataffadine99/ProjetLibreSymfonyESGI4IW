@@ -1,0 +1,96 @@
+{# templates/objet_collection/toutes_les_collections.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Toutes les Collections{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <h1>Toutes les Collections</h1>
+
+        <p><a href="{{ path('homepage') }}">Retour à l'Accueil</a></p>
+        <p><a href="{{ path('ma_collection') }}" class="btn btn-secondary mb-3">Voir Ma Collection (mes objets)</a></p>
+
+        {# Formulaire de filtre pour "Toutes les collections" #}
+        <form method="get" class="mb-3">
+            <div class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label for="type" class="form-label">Filtrer par type :</label>
+                </div>
+                <div class="col-auto">
+                    <select name="type" id="type" class="form-select">
+                        <option value="">Tous les types</option>
+                        <option value="livre" {% if app.request.get('type') == 'livre' %}selected{% endif %}>Livres</option>
+                        <option value="vinyle" {% if app.request.get('type') == 'vinyle' %}selected{% endif %}>Vinyles</option>
+                        <option value="jeu-video" {% if app.request.get('type') == 'jeu-video' %}selected{% endif %}>Jeux Vidéo</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                </div>
+            </div>
+        </form>
+
+        {% if objets is empty %}
+            <p>Aucune collection à afficher ou aucun objet ne correspond à ce filtre.</p>
+        {% else %}
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Propriétaire</th>
+                        <th>Date d'ajout</th>
+                        <th>Statut</th>
+                        <th>Catégorie</th>
+                        <th>Tags</th>
+                        <th>Emplacement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in objets %}
+                        <tr {% if currentUser and item.originalObject.utilisateur == currentUser %}class="table-info"{% endif %}>
+                            <td>{{ item.nom }}</td>
+                            <td>{{ item.type }}</td>
+                            <td>
+                                {% if item.originalObject.utilisateur %}
+                                    {{ item.originalObject.utilisateur.email }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ item.dateAjout|date('Y-m-d H:i:s') }}</td>
+                            <td>{{ item.statut ? item.statut.nom : 'N/A' }}</td>
+                            <td>{{ item.categorie ? item.categorie.nom : 'N/A' }}</td>
+                            <td>
+                                {% if item.tags is iterable and item.tags is not empty %}
+                                    {% for tag in item.tags %}
+                                        <span class="badge bg-secondary">{{ tag.nom }}</span>{% if not loop.last %}, {% endif %}
+                                    {% else %}
+                                        N/A
+                                    {% endfor %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ item.emplacement ? item.emplacement.nom : 'N/A' }}</td>
+                            <td>
+                                <a href="{{ path('objet_collection_details', {'id': item.id}) }}" class="btn btn-sm btn-info">Détails</a>
+                                
+                                {% if is_granted('EDIT', item.originalObject) %}
+                                    <a href="{{ path('objet_modifier', {'id': item.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                {% endif %}
+                                {% if is_granted('DELETE', item.originalObject) %}
+                                    <form method="post" action="{{ path('objet_supprimer', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');" style="display:inline-block;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+{% endblock %}

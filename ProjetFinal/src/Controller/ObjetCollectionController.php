@@ -7,7 +7,7 @@ use App\Entity\Livre;
 use App\Entity\ObjetCollection;
 use App\Entity\Vinyle;
 use App\Entity\JeuVideo;
-use App\Entity\Utilisateur; // N'oubliez pas d'importer Utilisateur
+use App\Entity\Utilisateur;
 use App\Form\LivreType;
 use App\Form\VinyleType;
 use App\Form\JeuVideoType;
@@ -34,7 +34,7 @@ class ObjetCollectionController extends AbstractController
         }
 
         $typeFiltre = $request->query->get('type');
-        $rawObjets = []; // Renommé pour plus de clarté: ce sont les objets Doctrine bruts
+        $rawObjets = [];
 
         if ($typeFiltre) {
             $rawObjets = $objetCollectionRepository->findByUserAndType($user, $typeFiltre);
@@ -42,10 +42,9 @@ class ObjetCollectionController extends AbstractController
             $rawObjets = $objetCollectionRepository->findByUser($user);
         }
 
-        // --- NOUVEAU CODE : Préparer les objets pour le template avec le type en string ---
         $objetsForTemplate = [];
         foreach ($rawObjets as $item) {
-            $typeString = 'Type inconnu'; // Valeur par défaut
+            $typeString = 'Type inconnu';
 
             if ($item instanceof Livre) {
                 $typeString = 'Livre';
@@ -55,34 +54,76 @@ class ObjetCollectionController extends AbstractController
                 $typeString = 'Jeu Vidéo';
             }
 
-            // Nous créons un tableau associatif pour chaque objet
-            // Cela inclut toutes les propriétés nécessaires et le type sous forme de string
             $objetsForTemplate[] = [
                 'id' => $item->getId(),
                 'nom' => $item->getNom(),
-                'type' => $typeString, // Le type déterminé en PHP pur (chaîne de caractères)
+                'type' => $typeString,
                 'dateAjout' => $item->getDateAjout(),
                 'statut' => $item->getStatut(), 
                 'categorie' => $item->getCategorie(),
                 'tags' => $item->getTags(),
                 'emplacement' => $item->getEmplacement(),
-                // Laissez l'objet original si vos Voters en ont besoin.
-                // Sinon, si les Voters sont basés sur l'ID, vous pouvez l'enlever pour optimiser.
                 'originalObject' => $item 
             ];
         }
-        // --- FIN NOUVEAU CODE ---
 
         return $this->render('objet_collection/ma_collection.html.twig', [
-            'objetsWithType' => $objetsForTemplate, // Passe le tableau préparé
+            'objetsWithType' => $objetsForTemplate,
         ]);
     }
 
-    // --- Le reste de votre contrôleur inchangé (details, modifier, supprimer, ajouter) ---
-    // Je ne les répète pas ici pour ne pas alourdir la réponse.
-    // Assurez-vous que les méthodes comme details, modifier, supprimer sont bien à jour
-    // et qu'elles utilisent le bon typage d'argument (e.g., ObjetCollection $objet)
-    // et les annotations #[IsGranted] si vous les utilisez pour la sécurité.
+   
+    #[Route('/toutes-les-collections', name: 'toutes_les_collections')]
+    #[IsGranted('ROLE_USER')] // Assurez-vous que seuls les utilisateurs connectés peuvent voir cette page
+    public function toutesLesCollections(ObjetCollectionRepository $objetCollectionRepository, Request $request): Response
+    {
+        /** @var Utilisateur $user */
+        $user = $this->getUser(); // Pour passer l'utilisateur courant au template si besoin (ex: pour distinguer ses objets)
+
+        $typeFiltre = $request->query->get('type');
+        $rawObjets = [];
+
+        // Si un type de filtre est spécifié (et non vide), utilisez la méthode findByType
+        if ($typeFiltre && $typeFiltre !== '') {
+            $rawObjets = $objetCollectionRepository->findByType($typeFiltre);
+        } else {
+            // Sinon, récupérez tous les objets de tous les utilisateurs
+            $rawObjets = $objetCollectionRepository->findAllObjectsWithUser();
+        }
+
+        // Préparer les objets pour le template (comme dans maCollection)
+        $objetsForTemplate = [];
+        foreach ($rawObjets as $item) {
+            $typeString = 'Type inconnu';
+            if ($item instanceof Livre) {
+                $typeString = 'Livre';
+            } elseif ($item instanceof Vinyle) {
+                $typeString = 'Vinyle';
+            } elseif ($item instanceof JeuVideo) {
+                $typeString = 'Jeu Vidéo';
+            }
+
+            $objetsForTemplate[] = [
+                'id' => $item->getId(),
+                'nom' => $item->getNom(),
+                'type' => $typeString,
+                'dateAjout' => $item->getDateAjout(),
+                'statut' => $item->getStatut(), 
+                'categorie' => $item->getCategorie(),
+                'tags' => $item->getTags(),
+                'emplacement' => $item->getEmplacement(),
+                'originalObject' => $item, // Garde l'objet original pour le Voter
+                'utilisateur' => $item->getUtilisateur() // Ajoute l'utilisateur de l'objet
+            ];
+        }
+
+        return $this->render('objet_collection/toutes_les_collections.html.twig', [
+            'objets' => $objetsForTemplate, // Passe le tableau préparé des objets
+            'currentUser' => $user, // Passe l'utilisateur courant pour les comparaisons dans Twig
+        ]);
+    }
+
+
 
     #[Route('/details/{id}', name: 'objet_collection_details')]
     public function details(int $id, ObjetCollectionRepository $objetCollectionRepository): Response
@@ -93,7 +134,6 @@ class ObjetCollectionController extends AbstractController
             throw $this->createNotFoundException('Objet non trouvé.');
         }
     
-        // Cette partie détermine le type pour la vue "détails" (qui est une vue séparée)
         $type = 'autre';
         if ($objet instanceof Livre) {
             $type = 'livre';
@@ -110,19 +150,15 @@ class ObjetCollectionController extends AbstractController
     }
 
     #[Route('/modifier/objet/{id}', name: 'objet_modifier')]
-    #[IsGranted('EDIT', subject: 'objet')] // Si vous utilisez les Voters
+    #[IsGranted('EDIT', subject: 'objet')]
     public function modifier(ObjetCollection $objet, ObjetCollectionRepository $objetCollectionRepository, EntityManagerInterface $entityManager, Request $request): Response
     {
-        // La méthode createFormForObject attend un objet et non un ID
         $form = $this->createFormForObject($objet); 
-    
         $form->handleRequest($request);
     
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-    
             $this->addFlash('success', 'L\'objet a été modifié avec succès.');
-    
             return $this->redirectToRoute('objet_collection_details', ['id' => $objet->getId()]);
         }
     
@@ -145,9 +181,8 @@ class ObjetCollectionController extends AbstractController
         }
     }
 
-
-    #[Route('/supprimer/objet/{id}', name: 'objet_supprimer', methods: ['POST'])] // Ajout de la méthode POST recommandée
-    #[IsGranted('DELETE', subject: 'objet')] // Si vous utilisez les Voters
+    #[Route('/supprimer/objet/{id}', name: 'objet_supprimer', methods: ['POST'])]
+    #[IsGranted('DELETE', subject: 'objet')]
     public function supprimer(ObjetCollection $objet, ObjetCollectionRepository $objetCollectionRepository, EntityManagerInterface $entityManager): Response
     {
         $entityManager->remove($objet);

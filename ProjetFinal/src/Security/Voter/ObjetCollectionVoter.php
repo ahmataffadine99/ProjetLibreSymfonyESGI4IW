@@ -3,19 +3,16 @@
 
 namespace App\Security\Voter;
 
-use App\Entity\ObjetCollection; // L'entité sur laquelle on vote
-use App\Entity\Utilisateur;      // L'entité de l'utilisateur
+use App\Entity\ObjetCollection;
+use App\Entity\Utilisateur;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface; // <--- C'EST LA NOUVELLE LIGNE 'USE' !
-// use Symfony\Component\Security\Core\Security; // <--- CETTE LIGNE EST MAINTENANT INUTILE, VOUS POUVEZ LA COMMENTER OU LA SUPPRIMER
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class ObjetCollectionVoter extends Voter
 {
-    // Au lieu de $security, nous utilisons $authorizationChecker
     private $authorizationChecker;
 
-    // Le constructeur reçoit maintenant AuthorizationCheckerInterface
     public function __construct(AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->authorizationChecker = $authorizationChecker;
@@ -23,6 +20,7 @@ class ObjetCollectionVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
+        // On ne gère que les attributs 'EDIT' et 'DELETE' pour l'entité ObjetCollection
         return in_array($attribute, ['EDIT', 'DELETE'])
                && $subject instanceof ObjetCollection;
     }
@@ -31,7 +29,7 @@ class ObjetCollectionVoter extends Voter
     {
         $user = $token->getUser();
 
-        // Si l'utilisateur n'est pas connecté, il ne peut rien faire.
+        // Si l'utilisateur n'est pas connecté ou n'est pas une instance d'Utilisateur, il ne peut rien faire.
         if (!$user instanceof Utilisateur) {
             return false;
         }
@@ -39,32 +37,43 @@ class ObjetCollectionVoter extends Voter
         /** @var ObjetCollection $objetCollection */
         $objetCollection = $subject;
 
-        // L'ADMIN peut TOUT faire sur n'importe quel objet.
-        // Utilisation de $this->authorizationChecker->isGranted()
+        // 1. **Priorité 1 : ROLE_ADMIN**
+        // Un ADMINISTRATEUR (ROLE_ADMIN) peut TOUT faire sur n'importe quel objet.
         if ($this->authorizationChecker->isGranted('ROLE_ADMIN')) {
+            return true; // Accès total
+        }
+
+        // 2. **Priorité 2 : Propriétaire de l'objet**
+        // L'utilisateur est-il le propriétaire de l'objet ?
+        // Cette vérification doit venir AVANT les rôles intermédiaires comme MODERATEUR
+        // si le propriétaire doit avoir des droits spécifiques (EDIT/DELETE) sur SES objets.
+        if ($this->isOwner($objetCollection, $user)) {
+            // Le propriétaire peut TOUJOURS éditer et supprimer SON objet.
             return true;
         }
 
-        // Le MODERATEUR peut TOUT faire sur n'importe quel objet (pour le moment).
-        // Utilisation de $this->authorizationChecker->isGranted()
-        // Si vous voulez que le modérateur NE DOIT PAS modifier un objet qui n'est pas le sien,
-        // vous DEVEZ supprimer ce bloc 'if' ou le conditionner :
+        // 3. **Priorité 3 : ROLE_MODERATEUR**
+        // Après avoir vérifié ADMIN et le propriétaire, on gère le MODERATEUR.
+        // Un MODERATEUR (ROLE_MODERATEUR) :
+        // - Peut MODIFIER (EDIT) n'importe quel objet (même s'il n'en est pas le propriétaire).
+        // - NE PEUT PAS SUPPRIMER (DELETE) d'objets, même si la méthode est appelée.
         if ($this->authorizationChecker->isGranted('ROLE_MODERATEUR')) {
-             return true; // Le modérateur peut faire ce qu'il veut sur les objets
+            if ($attribute === 'EDIT') {
+                return true; // Le modérateur peut modifier n'importe quel objet
+            }
+            if ($attribute === 'DELETE') {
+                return false; // Le modérateur NE PEUT PAS supprimer d'objets
+            }
         }
 
-        // La logique suivante gère les utilisateurs normaux (ROLE_USER)
-        switch ($attribute) {
-            case 'EDIT':
-            case 'DELETE':
-                return $this->isOwner($objetCollection, $user);
-        }
-
+        // Si aucune des conditions ci-dessus n'a donné un résultat, l'accès est refusé par défaut.
         return false;
     }
 
+    // Méthode utilitaire pour vérifier si l'utilisateur est le propriétaire de l'objet
     private function isOwner(ObjetCollection $objetCollection, Utilisateur $user): bool
     {
-        return $objetCollection->getUtilisateur() === $user;
+        // On s'assure que l'objet a un utilisateur associé avant de comparer
+        return $objetCollection->getUtilisateur() !== null && $objetCollection->getUtilisateur()->getId() === $user->getId();
     }
 }

@@ -5,6 +5,7 @@
 {% block body %}
     <h1>Ma Collection</h1>
 
+    {# Votre filtre de recherche existant - NE PAS TOUCHER #}
     <form method="get" class="mb-3">
         <div class="row g-3 align-items-center">
             <div class="col-auto">
@@ -41,21 +42,13 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in objetsWithType %}
+                {# item est maintenant un tableau associatif avec une clé 'type' #}
+                {% for item in objetsWithType %} 
                     <tr>
                         <td>{{ item.nom }}</td>
                         <td>
-                            <?php
-                            if ($item instanceof \App\Entity\Livre) {
-                                echo 'Livre';
-                            } elseif ($item instanceof \App\Entity\Vinyle) {
-                                echo 'Vinyle';
-                            } elseif ($item instanceof \App\Entity\JeuVideo) {
-                                echo 'Jeu Vidéo';
-                            } else {
-                                echo 'Type inconnu';
-                            }
-                            ?>
+                            {# AFFICHAGE DIRECT DU TYPE QUI EST DÉSORMAIS UNE CHAÎNE #}
+                            {{ item.type }} 
                         </td>
                         <td>{{ item.dateAjout|date('Y-m-d H:i:s') }}</td>
                         <td>{{ item.statut ? item.statut.nom : '' }}</td>
@@ -68,9 +61,23 @@
                         <td>{{ item.emplacement ? item.emplacement.nom : '' }}</td>
                         <td>
                             <a href="{{ path('objet_collection_details', {'id': item.id}) }}" class="btn btn-sm btn-info">Détails</a>
-                            <a href="{{ path('objet_modifier', {'id': item.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
-                            <a href="{{ path('objet_supprimer', {'id': item.id}) }}" class="btn btn-sm btn-danger"
-                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');">Supprimer</a>
+                            {# Utilisation de item.originalObject pour les Voters si la clé existe #}
+                            {# Sinon, vous devrez peut-être recharger l'objet dans le Voter par son ID #}
+                            {% if item.originalObject is defined and is_granted('EDIT', item.originalObject) %}
+                                <a href="{{ path('objet_modifier', {'id': item.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                            {% else %}
+                                {# Optionnel: si le Voter n'est pas utilisé ou si item.originalObject n'est pas passé #}
+                                <a href="{{ path('objet_modifier', {'id': item.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                            {% endif %}
+
+                            {% if item.originalObject is defined and is_granted('DELETE', item.originalObject) %}
+                                <a href="{{ path('objet_supprimer', {'id': item.id}) }}" class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');">Supprimer</a>
+                            {% else %}
+                                {# Optionnel: si le Voter n'est pas utilisé ou si item.originalObject n'est pas passé #}
+                                <a href="{{ path('objet_supprimer', {'id': item.id}) }}" class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');">Supprimer</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -82,5 +89,9 @@
         <a href="{{ path('objet_ajouter', {'type': 'livre'}) }}" class="btn btn-primary">Ajouter un Livre</a>
         <a href="{{ path('objet_ajouter', {'type': 'vinyle'}) }}" class="btn btn-primary">Ajouter un Vinyle</a>
         <a href="{{ path('objet_ajouter', {'type': 'jeu-video'}) }}" class="btn btn-primary">Ajouter un Jeu Vidéo</a>
+    </div>
+    
+    <div class="mt-4">    
+        <a href="{{ path('homepage') }}" class="btn btn-secondary">Retour à l'accueil</a>    
     </div>
 {% endblock %}

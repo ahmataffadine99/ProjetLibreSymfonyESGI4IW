@@ -1,16 +1,126 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bienvenue!{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    {% block stylesheets %}
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f8f9fa;
+            }
 
-        {% block javascripts %}
-        {% endblock %}
-    </head>
-    <body>
+            /* Styles spécifiques au header de la page d'accueil */
+            .homepage-header {
+                background-color: #343a40;
+                color: white;
+                padding: 10px 0;
+            }
+
+            .homepage-navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 20px;
+            }
+
+            .homepage-navbar-brand {
+                font-size: 1.5rem;
+                text-decoration: none;
+                color: white;
+            }
+
+            .homepage-nav-links {
+                display: none; /* Initialement caché */
+                flex-direction: column;
+                position: absolute;
+                top: 60px; /* Ajuster selon la hauteur de votre header */
+                right: 0;
+                background-color: rgba(52, 58, 64, 0.9);
+                width: 150px;
+                padding: 10px;
+                z-index: 1000;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+            }
+
+            .homepage-nav-links.show {
+                display: flex;
+            }
+
+            .homepage-nav-links a {
+                color: white;
+                padding: 10px 15px;
+                text-decoration: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .homepage-nav-links a:last-child {
+                border-bottom: none;
+            }
+
+            .homepage-hamburger-btn {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 5px;
+            }
+        </style>
+        {% block page_stylesheets %}{% endblock %}
+    {% endblock %}
+</head>
+<body>
+    {% if app.request.pathinfo == path('homepage') %}
+        <header class="homepage-header">
+            <nav class="homepage-navbar">
+                <a href="{{ path('homepage') }}" class="homepage-navbar-brand">Mon Collectionneur</a>
+                <button class="homepage-hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation">
+                    &#9776;
+                </button>
+                <div class="homepage-nav-links" id="nav-links">
+                    <a href="#">À propos</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Confidentialité</a>
+                </div>
+            </nav>
+        </header>
+    {% endif %}
+
+    <main class="mt-0">
         {% block body %}{% endblock %}
-    </body>
+    </main>
+
+    <footer class="bg-gradient-dark py-4 text-center text-white mt-5 border-top">
+        <div class="container">
+            <p class="mb-0"><i class="bi bi-c-circle me-1"></i> 2025 Mon Collectionneur. Propulsé par la passion.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block javascripts %}
+        {% if app.request.pathinfo == path('homepage') %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const hamburgerBtn = document.getElementById('hamburger-btn');
+                    const navLinks = document.getElementById('nav-links');
+
+                    if (hamburgerBtn && navLinks) {
+                        hamburgerBtn.addEventListener('click', function() {
+                            navLinks.classList.toggle('show');
+                        });
+                    }
+                });
+            </script>
+        {% endif %}
+        {% block page_javascripts %}{% endblock %}
+    {% endblock %}
+</body>
 </html>

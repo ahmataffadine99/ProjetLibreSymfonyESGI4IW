@@ -70,5 +70,6 @@ public function updateRoles(Request $request, int $id, UtilisateurRepository $ut
     ]);
 }
 
+
     // Nous ajouterons l'action pour traiter la soumission du formulaire ici
 }

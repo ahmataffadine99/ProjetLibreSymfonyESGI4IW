@@ -1,0 +1,45 @@
+{# templates/user/my_collection_dashboard.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma Collection Personnelle{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <h1 class="mb-4">Bienvenue dans votre espace personnel, {{ app.user.email }} !</h1>
+        <p class="lead">C'est ici que vous pouvez gérer votre précieuse collection.</p>
+
+        ---
+
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <h2>Mes Objets de Collection</h2>
+                <p>Affichez, modifiez ou supprimez les objets que vous avez ajoutés.</p>
+                <p>
+                    <a href="{{ path('ma_collection') }}" class="btn btn-primary btn-lg">Voir toute ma Collection</a>
+                </p>
+            </div>
+            <div class="col-md-6">
+                <h2>Ajouter un Nouvel Objet</h2>
+                <p>Commencez à enrichir votre collection dès maintenant !</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ path('objet_ajouter', {'type': 'livre'}) }}" class="btn btn-success">Ajouter un Livre</a>
+                    <a href="{{ path('objet_ajouter', {'type': 'vinyle'}) }}" class="btn btn-success">Ajouter un Vinyle</a>
+                    <a href="{{ path('objet_ajouter', {'type': 'jeu-video'}) }}" class="btn btn-success">Ajouter un Jeu Vidéo</a>
+                </div>
+            </div>
+        </div>
+
+        ---
+
+        <div class="mt-5">
+            <h2>Mon Profil</h2>
+            <p>Gérez vos informations personnelles et votre compte.</p>
+            <p>
+                {# Si vous avez une route pour modifier le profil, mettez-la ici #}
+                {# <a href="{{ path('app_profile_edit') }}" class="btn btn-info">Modifier mon Profil</a> #}
+                <a href="{{ path('logout') }}" class="btn btn-secondary">Se déconnecter</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

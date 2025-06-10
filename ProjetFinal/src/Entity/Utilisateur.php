@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface as PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups; // NOUVEAU
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
@@ -15,21 +16,26 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU : Exposez l'ID de l'utilisateur pour la lecture/écriture API
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU : Exposez l'email pour la lecture/écriture API
     private ?string $email = null;
 
     #[ORM\Column]
+    // PAS DE GROUPE ICI : Les rôles ne sont généralement pas exposés directement via l'API publique
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    // AUCUN GROUPE ICI : NE JAMAIS EXPOSER LE MOT DE PASSE EN API
     private ?string $password = null;
 
     #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: ObjetCollection::class)]
+    // PAS DE GROUPE ICI pour éviter les boucles infinies.
     private Collection $objetsAjoutes;
 
     public function __construct()

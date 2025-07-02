@@ -45,16 +45,10 @@ class ObjetCollectionRepository extends ServiceEntityRepository
             ->andWhere('oc.utilisateur = :utilisateur')
             ->setParameter('utilisateur', $utilisateur);
 
-        // --- C'EST LA CORRECTION CRUCIALE ET DÉFINITIVE ---
         $entityClass = $this->getClassNameForType($type);
         if ($entityClass !== ObjetCollection::class) {
-            // CONSTRUIRE LA CHAÎNE DIRECTEMENT SANS PARAMÈTRE POUR INSTANCE OF
             $qb->andWhere('oc INSTANCE OF ' . $entityClass);
         }
-        // --------------------------------------------------
-        // Ancien code (qui posait problème)
-// $qb->andWhere('oc INSTANCE OF :entityClass')
-//    ->setParameter('entityClass', $entityClass);
 
         return $qb
             ->orderBy('oc.dateAjout', 'DESC')
@@ -62,20 +56,25 @@ class ObjetCollectionRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    // Gardez votre méthode findByType existante si elle est utilisée ailleurs (par exemple, par l'admin)
-    // Note: Cette méthode pourrait aussi être améliorée avec la même logique si elle a le même problème.
+    /**
+     * Récupère les objets d'un type spécifique pour TOUS les utilisateurs.
+     * C'est la méthode à utiliser pour le filtrage de la page /toutes-les-collections
+     * quand un type spécifique est sélectionné.
+     * @return ObjetCollection[]
+     */
     public function findByType(string $type): array
     {
-        $qb = $this->createQueryBuilder('oc');
-        $entityClass = $this->getClassNameForType($type);
+        $qb = $this->createQueryBuilder('oc')
+                    ->leftJoin('oc.utilisateur', 'u') // Jointure pour afficher le propriétaire
+                    ->addSelect('u');
 
+        $entityClass = $this->getClassNameForType($type);
         if ($entityClass !== ObjetCollection::class) {
-             $qb->where('oc INSTANCE OF ' . $entityClass);
+            $qb->andWhere('oc INSTANCE OF ' . $entityClass);
         }
-        // Si $entityClass est ObjetCollection::class, on ne met pas de where clause spécifique
-        // car cela signifierait "tous les objets", ce que le query builder fait déjà par défaut sans where.
 
         return $qb
+            ->orderBy('oc.dateAjout', 'DESC')
             ->getQuery()
             ->getResult();
     }
@@ -89,28 +88,22 @@ class ObjetCollectionRepository extends ServiceEntityRepository
             'livre' => Livre::class,
             'vinyle' => Vinyle::class,
             'jeu-video' => JeuVideo::class,
-            default => ObjetCollection::class,
+            default => ObjetCollection::class, // Retourne la classe de base si le type est inconnu ou vide
         };
     }
 
-
- // --- C'EST CETTE MÉTHODE QUI DOIT ÊTRE PRÉSENTE ET CORRECTEMENT ÉCRITE ---
     /**
-     * @return ObjetCollection[] Returns an array of ObjetCollection objects with their associated User.
+     * Récupère tous les objets de collection avec leur utilisateur associé.
+     * Idéal pour la page "Toutes les collections" sans filtre.
+     * @return ObjetCollection[]
      */
     public function findAllObjectsWithUser(): array
     {
         return $this->createQueryBuilder('oc')
-            ->leftJoin('oc.utilisateur', 'u') // Jointure avec l'entité Utilisateur
-            ->addSelect('u') // Sélectionne également les données de l'utilisateur
+            ->leftJoin('oc.utilisateur', 'u')
+            ->addSelect('u') // Pour charger l'utilisateur et éviter les requêtes N+1 dans Twig
             ->orderBy('oc.dateAjout', 'DESC')
             ->getQuery()
             ->getResult();
     }
-
 }
-
-
-
-
-

@@ -1,30 +1,67 @@
+# config/packages/security.yaml
 security:
-    password_hashers:
-        App\Entity\Utilisateur: 'auto'
-
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
+        # Indique à Symfony comment charger vos utilisateurs
         app_user_provider:
             entity:
                 class: App\Entity\Utilisateur
-                property: email
+                property: email # La propriété utilisée pour l'identification (email dans votre cas)
+
+    password_hashers:
+        # Configure le type de hachage de mot de passe pour votre entité Utilisateur
+        App\Entity\Utilisateur: 'auto' # Symfony choisira le meilleur algorithme automatiquement
 
     firewalls:
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            pattern: ^/(_(profiler|wdt)|css|images|js)/ # Exclut ces chemins du processus de sécurité
             security: false
+
         main:
-            pattern: ^/
-            provider: app_user_provider
+            pattern: ^/ # Ce firewall s'applique à toutes les routes non gérées par 'dev'
+            provider: app_user_provider # Utilise le provider d'utilisateurs défini ci-dessus
+
+            # --- Authentification par formulaire (pour l'interface web traditionnelle) ---
             form_login:
-                login_path: login
-                default_target_path: / # COMMENTEZ OU SUPPRIMEZ CETTE LIGNE
-                check_path: login # La route pour soumettre le formulaire de connexion
+                login_path: login # La route Symfony pour afficher le formulaire de connexion
+                check_path: login # La route Symfony où le formulaire soumettra les identifiants
+                # default_target_path: / # Décommenter si vous voulez une redirection par défaut après le login (pour le navigateur)
+                # target_path_parameter: _target_path # Permet de spécifier une URL de redirection après le login
+                # failure_path: login # En cas d'échec de connexion via formulaire
+                # enable_csrf: true # Recommandé pour la sécurité des formulaires
+
+            # --- Authentification par JSON (pour votre API RESTful) ---
+            json_login:
+                check_path: /api/login      # L'URL où les clients API (comme Postman) enverront les identifiants POST
+                username_path: email        # La clé dans le JSON du corps de la requête pour l'email
+                password_path: password     # La clé dans le JSON du corps de la requête pour le mot de passe
+                success_handler: App\Security\LoginSuccessHandler # Le service qui gérera la réponse JSON en cas de succès
+                failure_handler: App\Security\LoginFailureHandler # Le service qui gérera la réponse JSON en cas d'échec
+
+            # --- Déconnexion ---
             logout:
-                path: logout
-                invalidate_session: true # Invalider la session après la déconnexion
+                path: logout # La route Symfony pour la déconnexion via le navigateur
+                target: /                  # Redirige après la déconnexion
+                invalidate_session: true   # Invalide la session de l'utilisateur après la déconnexion
+
+            # Pour le moment, laissez stateless à 'false' car vous utilisez les sessions Symfony pour l'API.
+            # Passez à 'true' si vous implémentez un système d'authentification sans état (ex: JWT).
+            # stateless: false
 
     access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        # Exemple pour le rôle de modérateur, adaptez vos routes
-        # - { path: ^/moderateur, roles: ROLE_MODERATEUR }
-        - { path: ^/profile, roles: ROLE_USER }
+        # Permet un accès public (non authentifié) à la route de connexion API
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        # Protège toutes les autres routes commençant par /api, exige une authentification complète
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        
+        # Vos règles d'accès spécifiques
+        - { path: ^/admin, roles: ROLE_ADMIN } # Seuls les utilisateurs avec le rôle ROLE_ADMIN peuvent accéder aux chemins /admin
+        - { path: ^/profile, roles: ROLE_USER } # Les utilisateurs authentifiés (ROLE_USER) peuvent accéder aux chemins /profile
+
+        # Assurez-vous que votre page de connexion par formulaire est accessible publiquement
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        
+        # Exemple : Accès par défaut à la page d'accueil ou à d'autres pages pour tout le monde
+        # - { path: ^/, roles: PUBLIC_ACCESS }
+        # Ou si vous voulez que tous les utilisateurs connectés puissent accéder par défaut à la racine
+        # - { path: ^/, roles: IS_AUTHENTICATED_REMEMBERED }

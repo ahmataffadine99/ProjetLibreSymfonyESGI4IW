@@ -6,6 +6,7 @@ use App\Repository\ProprietaireRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups; // NOUVEAU
 
 #[ORM\Entity(repositoryClass: ProprietaireRepository::class)]
 class Proprietaire
@@ -13,18 +14,22 @@ class Proprietaire
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?string $email = null;
 
     /**
      * @var Collection<int, ObjetCollection>
      */
     #[ORM\OneToMany(targetEntity: ObjetCollection::class, mappedBy: 'proprietaire')]
+    // PAS DE GROUPE ICI pour éviter les boucles infinies.
     private Collection $objetsCollection;
 
     public function __construct()

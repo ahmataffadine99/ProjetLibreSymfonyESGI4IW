@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Categorie;
+use Symfony\Component\Serializer\Annotation\Groups; // NOUVEAU
 
 #[ORM\Entity(repositoryClass: ObjetCollectionRepository::class)]
 #[ORM\InheritanceType('JOINED')]
@@ -19,59 +20,64 @@ abstract class ObjetCollection
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?string $nom = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?\DateTimeInterface $dateAjout = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?string $description = null;
-
-    
 
     /**
      * @var Collection<int, Categorie>
      */
     #[ORM\ManyToMany(targetEntity: Categorie::class, mappedBy: 'objets')]
+    // PAS DE GROUPE ICI pour éviter les boucles infinies.
     private Collection $categories;
 
     #[ORM\ManyToOne(inversedBy: 'objetsCollection')]
+    // À ajuster si vous voulez exposer le propriétaire dans l'API. Si oui, ajoutez un groupe, sinon, pas de groupe.
     private ?Proprietaire $proprietaire = null;
 
     #[ORM\ManyToOne(inversedBy: 'objetsCollection')]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?Emplacement $emplacement = null;
-
 
     #[ORM\ManyToOne(inversedBy: 'objetsCollection')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?StatutObjet $statut = null;
 
     #[ORM\ManyToOne(inversedBy: 'objetsCollection')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
     private ?Categorie $categorie = null;
 
+    /**
+     * @var Collection<int, Tag>
+     */
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'objetsCollection')]
+    #[ORM\JoinTable(name: 'objet_collection_tag')]
+    #[ORM\JoinColumn(name: 'objet_collection_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id')]
+    #[Groups(['collection_read', 'collection_write'])] // NOUVEAU
+    private Collection $tags;
 
-
-/**
- * @var Collection<int, Tag>
- */
-#[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'objetsCollection')]
-#[ORM\JoinTable(name: 'objet_collection_tag')]
-#[ORM\JoinColumn(name: 'objet_collection_id', referencedColumnName: 'id')]
-#[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id')]
-private Collection $tags;
-
-
-    
     #[ORM\ManyToOne(inversedBy: 'objetsAjoutes')]
+    #[Groups(['collection_read'])] // NOUVEAU (lecture seule pour l'utilisateur lié)
     private ?Utilisateur $utilisateur = null;
 
     public function __construct()
     {
         $this->tags = new ArrayCollection();
+        $this->categories = new ArrayCollection(); // NOUVEAU : Initialiser la collection categories
     }
 
     /**
@@ -86,7 +92,7 @@ private Collection $tags;
     {
         if (!$this->tags->contains($tag)) {
             $this->tags->add($tag);
-            $tag->addObjetsCollection($this);
+            // $tag->addObjetsCollection($this); // Cette ligne pourrait causer une boucle si non gérée côté Tag
         }
 
         return $this;
@@ -95,13 +101,12 @@ private Collection $tags;
     public function removeTag(Tag $tag): static
     {
         if ($this->tags->removeElement($tag)) {
-            $tag->removeObjetsCollection($this);
+            // $tag->removeObjetsCollection($this); // Cette ligne pourrait causer une boucle si non gérée côté Tag
         }
 
         return $this;
     }
 
-   
     public function getCategories(): Collection
     {
         return $this->categories;
@@ -148,11 +153,6 @@ private Collection $tags;
         return $this;
     }
 
-    /**
-     * @return Collection<int, Categorie>
-     */
-
-
     public function getCategorie(): ?Categorie
     {
         return $this->categorie;
@@ -165,8 +165,6 @@ private Collection $tags;
         return $this;
     }
 
-
-
     public function getStatut(): ?StatutObjet
     {
         return $this->statut;
@@ -178,12 +176,12 @@ private Collection $tags;
 
         return $this;
     }
-    
+
     public function addCategory(Categorie $category): static
     {
         if (!$this->categories->contains($category)) {
             $this->categories->add($category);
-            $category->addObjet($this);
+            // $category->addObjet($this); // Cette ligne pourrait causer une boucle si non gérée côté Categorie
         }
 
         return $this;
@@ -192,7 +190,7 @@ private Collection $tags;
     public function removeCategory(Categorie $category): static
     {
         if ($this->categories->removeElement($category)) {
-            $category->removeObjet($this);
+            // $category->removeObjet($this); // Cette ligne pourrait causer une boucle si non gérée côté Categorie
         }
 
         return $this;
@@ -222,9 +220,6 @@ private Collection $tags;
         return $this;
     }
 
-  
-
-   
     public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
@@ -236,5 +231,4 @@ private Collection $tags;
 
         return $this;
     }
-    
 }

@@ -3,11 +3,18 @@
 {% block title %}Espace Modérateur{% endblock %}
 
 {% block body %}
-    <h1>Bienvenue dans l'espace modérateur !</h1>
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold mb-4">Bienvenue dans l'espace modérateur !</h1>
 
-    <p>Vous avez les permissions de modérateur.</p>
+        <p class="text-lg text-gray-700 mb-6">Vous avez les permissions de modérateur.</p>
 
-    <p><a href="{{ path('logout') }}">Se déconnecter</a></p>
-    <p><a href="{{ path('homepage') }}">Retour à l'accueil</a></p>
-
+        <div class="flex flex-col sm:flex-row gap-4">
+            <p>
+                <a href="{{ path('logout') }}" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Se déconnecter</a>
+            </p>
+            <p>
+                <a href="{{ path('homepage') }}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Retour à l'accueil</a>
+            </p>
+        </div>
+    </div>
 {% endblock %}

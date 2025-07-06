@@ -5,92 +5,106 @@
 {% block title %}Toutes les Collections{% endblock %}
 
 {% block body %}
-    <div class="container my-5">
-        <h1>Toutes les Collections</h1>
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold mb-6">Toutes les Collections</h1>
 
-        <p><a href="{{ path('homepage') }}">Retour à l'Accueil</a></p>
-        <p><a href="{{ path('ma_collection') }}" class="btn btn-secondary mb-3">Voir Ma Collection (mes objets)</a></p>
+        <div class="mb-6 flex flex-col sm:flex-row gap-4">
+            <p>
+                <a href="{{ path('homepage') }}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                    Retour à l'Accueil
+                </a>
+            </p>
+            <p>
+                <a href="{{ path('ma_collection') }}" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                    Voir Ma Collection (mes objets)
+                </a>
+            </p>
+        </div>
 
         {# Formulaire de filtre pour "Toutes les collections" #}
-        <form method="get" class="mb-3">
-            <div class="row g-3 align-items-center">
-                <div class="col-auto">
-                    <label for="type" class="form-label">Filtrer par type :</label>
+        <form method="get" class="mb-6">
+            <div class="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0">
+                <div>
+                    <label for="type" class="block text-gray-700 text-sm font-bold mb-1">Filtrer par type :</label>
                 </div>
-                <div class="col-auto">
-                    <select name="type" id="type" class="form-select">
+                <div>
+                    <select name="type" id="type" class="shadow border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Tous les types</option>
                         <option value="livre" {% if app.request.get('type') == 'livre' %}selected{% endif %}>Livres</option>
                         <option value="vinyle" {% if app.request.get('type') == 'vinyle' %}selected{% endif %}>Vinyles</option>
                         <option value="jeu-video" {% if app.request.get('type') == 'jeu-video' %}selected{% endif %}>Jeux Vidéo</option>
                     </select>
                 </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                <div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out">
+                        Filtrer
+                    </button>
                 </div>
             </div>
         </form>
 
         {% if objets is empty %}
-            <p>Aucune collection à afficher ou aucun objet ne correspond à ce filtre.</p>
+            <p class="text-lg text-gray-700">Aucune collection à afficher ou aucun objet ne correspond à ce filtre.</p>
         {% else %}
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Type</th>
-                        <th>Propriétaire</th>
-                        <th>Date d'ajout</th>
-                        <th>Statut</th>
-                        <th>Catégorie</th>
-                        <th>Tags</th>
-                        <th>Emplacement</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in objets %}
-                        <tr {% if currentUser and item.originalObject.utilisateur == currentUser %}class="table-info"{% endif %}>
-                            <td>{{ item.nom }}</td>
-                            <td>{{ item.type }}</td>
-                            <td>
-                                {% if item.originalObject.utilisateur %}
-                                    {{ item.originalObject.utilisateur.email }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                            <td>{{ item.dateAjout|date('Y-m-d H:i:s') }}</td>
-                            <td>{{ item.statut ? item.statut.nom : 'N/A' }}</td>
-                            <td>{{ item.categorie ? item.categorie.nom : 'N/A' }}</td>
-                            <td>
-                                {% if item.tags is iterable and item.tags is not empty %}
-                                    {% for tag in item.tags %}
-                                        <span class="badge bg-secondary">{{ tag.nom }}</span>{% if not loop.last %}, {% endif %}
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Propriétaire</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'ajout</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Emplacement</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in objets %}
+                            <tr class="{% if currentUser and item.originalObject.utilisateur == currentUser %}bg-blue-50{% endif %}">
+                                <td class="px-6 py-4 whitespace-nowrap">{{ item.nom }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ item.type }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if item.originalObject.utilisateur %}
+                                        {{ item.originalObject.utilisateur.email }}
                                     {% else %}
                                         N/A
-                                    {% endfor %}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                            <td>{{ item.emplacement ? item.emplacement.nom : 'N/A' }}</td>
-                            <td>
-                                <a href="{{ path('objet_collection_details', {'id': item.id}) }}" class="btn btn-sm btn-info">Détails</a>
-                                
-                                {% if is_granted('EDIT', item.originalObject) %}
-                                    <a href="{{ path('objet_modifier', {'id': item.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
-                                {% endif %}
-                                {% if is_granted('DELETE', item.originalObject) %}
-                                    <form method="post" action="{{ path('objet_supprimer', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');" style="display:inline-block;">
-                                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
-                                    </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ item.dateAjout|date('Y-m-d H:i:s') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ item.statut ? item.statut.nom : 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ item.categorie ? item.categorie.nom : 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if item.tags is iterable and item.tags is not empty %}
+                                        {% for tag in item.tags %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">{{ tag.nom }}</span>{% if not loop.last %}, {% endif %}
+                                        {% else %}
+                                            N/A
+                                        {% endfor %}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ item.emplacement ? item.emplacement.nom : 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{{ path('objet_collection_details', {'id': item.id}) }}" class="text-blue-600 hover:text-blue-900 mr-2">Détails</a>
+                                    
+                                    {% if is_granted('EDIT', item.originalObject) %}
+                                        <a href="{{ path('objet_modifier', {'id': item.id}) }}" class="text-yellow-600 hover:text-yellow-900 mr-2">Modifier</a>
+                                    {% endif %}
+                                    {% if is_granted('DELETE', item.originalObject) %}
+                                        <form method="post" action="{{ path('objet_supprimer', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet objet ?');" class="inline-block">
+                                            <button type="submit" class="text-red-600 hover:text-red-900">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

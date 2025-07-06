@@ -50,7 +50,7 @@ class RegistrationController extends AbstractController
             $eventDispatcher->dispatch($event, InteractiveLoginEvent::class);
 
             
-            return $this->redirectToRoute('profile_index'); 
+            return $this->redirectToRoute('homepage'); 
         }
 
         return $this->render('registration/register.html.twig', [

@@ -3,38 +3,38 @@
 {% block title %}Bienvenue sur Mon Collectionneur{% endblock %}
 
 {% block body %}
-    <div class="hero-section text-white text-center d-flex justify-content-center align-items-center" style="height: 100vh; background-image: linear-gradient(to right, rgba(0, 50, 100, 0.7), rgba(0, 0, 0, 0.8)), url('https://via.placeholder.com/1600x900?text=Background+Image'); background-size: cover; background-position: center;">
-        <div class="container py-5">
-            <h1 class="display-3 fw-bold text-shadow" >Votre Univers de Collections</h1>
-            <p class="lead text-shadow">Organisez, explorez et partagez vos passions uniques.</p>
-            <div class="mt-4">
+    <div class="relative h-screen bg-cover bg-center flex items-center justify-center text-white" style="background-image: linear-gradient(to right, rgba(0, 50, 100, 0.7), rgba(0, 0, 0, 0.8)), url('https://via.placeholder.com/1600x900?text=Background+Image');">
+        <div class="container mx-auto py-5 text-center">
+            <h1 class="text-5xl font-bold drop-shadow-lg">Votre Univers de Collections</h1>
+            <p class="text-xl mt-3 drop-shadow-lg">Organisez, explorez et partagez vos passions uniques.</p>
+            <div class="mt-8">
                 {% if not app.user %}
-                    <a href="{{ path('login') }}" class="btn btn-lg btn-primary me-2">Connexion</a>
-                    <a href="{{ path('app_register') }}" class="btn btn-lg btn-outline-light">Inscription</a>
+                    <a href="{{ path('login') }}" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition duration-300 ease-in-out mr-4">Connexion</a>
+                    <a href="{{ path('app_register') }}" class="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg shadow-lg hover:bg-white hover:text-blue-600 transition duration-300 ease-in-out">Inscription</a>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="container my-5">
+    <div class="container mx-auto my-10">
         {% if app.user %}
-            <div class="bg-white shadow-sm rounded p-4">
-                <h2 class="mb-3">Bienvenue, {{ app.user.email }} !</h2>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{{ path('profile_index') }}" class="text-decoration-none"><i class="bi bi-person me-2"></i> Votre Profil</a></li>
+            <div class="bg-white shadow-xl rounded-lg p-6">
+                <h2 class="text-3xl font-semibold mb-5">Bienvenue, {{ app.user.email }} !</h2>
+                <ul class="space-y-3">
+                    <li><a href="{{ path('profile_index') }}" class="flex items-center text-blue-600 hover:text-blue-800 text-lg transition duration-200 ease-in-out"><i class="bi bi-person mr-3"></i> Votre Profil</a></li>
 
                     {# AJOUTEZ CE BLOC POUR LE LIEN "MA COLLECTION" #}
                     {# Si l'utilisateur est un simple ROLE_USER ou plus (ROLE_MODERATEUR, ROLE_ADMIN) #}
                     {% if is_granted('ROLE_USER') %}
-                        <li class="mb-2"><a href="{{ path('ma_collection') }}" class="text-decoration-none"><i class="bi bi-collection me-2"></i> Ma Collection</a></li>
+                        <li><a href="{{ path('ma_collection') }}" class="flex items-center text-blue-600 hover:text-blue-800 text-lg transition duration-200 ease-in-out"><i class="bi bi-collection mr-3"></i> Ma Collection</a></li>
                     {% endif %}
                     {% if is_granted('ROLE_MODERATEUR') %}
-                        <li class="mb-2"><a href="{{ path('moderateur_index') }}" class="text-decoration-none"><i class="bi bi-shield-fill-check me-2"></i> Espace Modérateur</a></li>
+                        <li><a href="{{ path('moderateur_index') }}" class="flex items-center text-blue-600 hover:text-blue-800 text-lg transition duration-200 ease-in-out"><i class="bi bi-shield-fill-check mr-3"></i> Espace Modérateur</a></li>
                     {% endif %}
                     {% if is_granted('ROLE_ADMIN') %}
-                        <li class="mb-2"><a href="{{ path('admin_index') }}" class="text-decoration-none"><i class="bi bi-tools me-2"></i> Espace Admin</a></li>
+                        <li><a href="{{ path('admin_index') }}" class="flex items-center text-blue-600 hover:text-blue-800 text-lg transition duration-200 ease-in-out"><i class="bi bi-tools mr-3"></i> Espace Admin</a></li>
                     {% endif %}
-                    <li><a href="{{ path('logout') }}" class="text-decoration-none"><i class="bi bi-box-arrow-right me-2"></i> Se déconnecter</a></li>
+                    <li><a href="{{ path('logout') }}" class="flex items-center text-red-600 hover:text-red-800 text-lg transition duration-200 ease-in-out"><i class="bi bi-box-arrow-right mr-3"></i> Se déconnecter</a></li>
                 </ul>
             </div>
         {% endif %}

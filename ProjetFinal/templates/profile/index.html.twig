@@ -3,15 +3,21 @@
 {% block title %}Votre Profil{% endblock %}
 
 {% block body %}
-    <h1>Votre Profil</h1>
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold mb-6">Votre Profil</h1>
 
-    {% if user %}
-        <p>Email : {{ user.email }}</p>
-        <p>Rôles : {{ user.roles|join(', ') }}</p>
-    {% else %}
-        <p>Vous n'êtes pas connecté.</p>
-    {% endif %}
+        {% if user %}
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                <p class="text-lg mb-2"><strong class="font-semibold">Email :</strong> {{ user.email }}</p>
+                <p class="text-lg"><strong class="font-semibold">Rôles :</strong> {{ user.roles|join(', ') }}</p>
+            </div>
+        {% else %}
+            <p class="text-lg text-gray-700">Vous n'êtes pas connecté.</p>
+        {% endif %}
 
-    <p><a href="{{ path('logout') }}">Se déconnecter</a></p>
-    <p><a href="{{ path('homepage') }}">Retour à l'accueil</a></p>
+        <div class="mt-8 space-y-4">
+            <a href="{{ path('logout') }}" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Se déconnecter</a>
+            <a href="{{ path('homepage') }}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Retour à l'accueil</a>
+        </div>
+    </div>
 {% endblock %}
